@@ -32,9 +32,13 @@ async function run() {
     const campsCollection = client.db('medicalCamp').collection('availableCamps');
 
 
-    app.get("/camps", async(req, res)=>{
-        const result = await campsCollection.find().toArray()
-        res.send(result);
+    app.get("/camps", async (req, res) => {
+      const query = {};
+      const options = {
+        sort: { participantCount: -1 } 
+      };
+      const result = await campsCollection.find(query, options).toArray()
+      res.send(result);
     })
 
 
@@ -52,10 +56,10 @@ run().catch(console.dir);
 
 
 
-app.get("/", (req, res)=>{
-    res.send("medical camp is running properly")
+app.get("/", (req, res) => {
+  res.send("medical camp is running properly")
 })
 
-app.listen(port, ()=>{
-    console.log(`Medical camp is running on port ${port}`)
+app.listen(port, () => {
+  console.log(`Medical camp is running on port ${port}`)
 })
