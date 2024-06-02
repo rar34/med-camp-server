@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 
@@ -31,14 +31,22 @@ async function run() {
 
     const campsCollection = client.db('medicalCamp').collection('availableCamps');
 
-
+    // popular and available camp 
     app.get("/camps", async (req, res) => {
-      const query = {};
-      const options = {
-        sort: { participantCount: -1 } 
-      };
-      const result = await campsCollection.find(query, options).toArray()
+      // const query = {};
+      // const options = {
+      //   sort: { participantCount: -1 } 
+      // };
+      const result = await campsCollection.find().toArray()
+      // const result = await campsCollection.find(query, options).toArray()
       res.send(result);
+    })
+
+    app.get("/camps/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await campsCollection.findOne(query)
+      res.send(result)
     })
 
 
