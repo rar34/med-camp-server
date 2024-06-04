@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
@@ -30,6 +31,31 @@ async function run() {
     await client.connect();
 
     const campsCollection = client.db('medicalCamp').collection('availableCamps');
+    const userCollection = client.db('medicalCamp').collection('users');
+
+    // token
+    app.post('/jwt', async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' })
+      res.send({ token })
+    })
+
+
+
+    // user related api
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email }
+      const existingUser = await userCollection.findOne(query)
+      if (existingUser) {
+          return res.send({ message: 'User already exists', insertedId: null })
+      }
+
+      const result = await userCollection.insertOne(user)
+      res.send(result)
+  })
+
+
 
     // popular and available camp 
     app.get("/camps", async (req, res) => {
@@ -44,7 +70,7 @@ async function run() {
 
     app.get("/camps/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) }
       const result = await campsCollection.findOne(query)
       res.send(result)
     })
