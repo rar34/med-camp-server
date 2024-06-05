@@ -60,12 +60,27 @@ async function run() {
 
 
     // user related api
-    app.get("/users/:email",verifyToken, async(req, res)=>{
+    app.get("/users/:email", verifyToken, async (req, res) => {
       // console.log(req.headers)
       const email = req.params.email;
-      const query = {email: email}
+      const query = { email: email }
       const result = await userCollection.findOne(query);
       res.send(result)
+    })
+
+    app.get('/users/admin/:email', verifyToken,  async (req, res) => {
+      const email = req.params.email;
+      // console.log("user inside decoded",req.decoded)
+      if (email !== req.decoded.email) {
+        return res.status(403).send({ message: 'forbidden access' })
+      }
+      const query = { email: email }
+      const user = await userCollection.findOne(query)
+      let admin = false;
+      if (user) {
+        admin = user?.role === 'admin'
+      }
+      res.send({ admin })
     })
 
 
