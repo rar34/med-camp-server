@@ -42,7 +42,7 @@ async function run() {
 
     // verify token
     const verifyToken = (req, res, next) => {
-      // console.log('inside verify token', req.headers.authorization)
+      console.log('inside verify token', req.headers.authorization)
       if (!req.headers.authorization) {
         return res.status(401).send({ message: 'unauthorized access' })
       }
@@ -60,8 +60,8 @@ async function run() {
 
 
     // user related api
-    app.get("/users/:email", async(req, res)=>{
-      console.log(req.headers)
+    app.get("/users/:email",verifyToken, async(req, res)=>{
+      // console.log(req.headers)
       const email = req.params.email;
       const query = {email: email}
       const result = await userCollection.findOne(query);
