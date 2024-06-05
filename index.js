@@ -58,6 +58,20 @@ async function run() {
     }
 
 
+    // verify admin
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email }
+      const user = await userCollection.findOne(query)
+      const isAdmin = user?.role === 'admin';
+      if (!isAdmin) {
+        return res.status(403).send({ message: 'forbidden access' })
+      }
+      next();
+
+    }
+
+
 
     // user related api
     app.get("/users/:email", verifyToken, async (req, res) => {
@@ -68,7 +82,7 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/users/admin/:email', verifyToken,  async (req, res) => {
+    app.get('/users/admin/:email', verifyToken,verifyAdmin, async (req, res) => {
       const email = req.params.email;
       // console.log("user inside decoded",req.decoded)
       if (email !== req.decoded.email) {
