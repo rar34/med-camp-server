@@ -82,7 +82,7 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/users/admin/:email', verifyToken,verifyAdmin, async (req, res) => {
+    app.get('/users/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
       const email = req.params.email;
       // console.log("user inside decoded",req.decoded)
       if (email !== req.decoded.email) {
@@ -112,7 +112,7 @@ async function run() {
 
 
 
-    // popular and available camp 
+    // camps related apis 
     app.get("/camps", async (req, res) => {
       // const query = {};
       // const options = {
@@ -121,6 +121,12 @@ async function run() {
       const result = await campsCollection.find().toArray()
       // const result = await campsCollection.find(query, options).toArray()
       res.send(result);
+    })
+
+    app.post("/camps", async (req, res) => {
+      const newCamp = req.body;
+      const result = await campsCollection.insertOne(newCamp);
+      res.send(result)
     })
 
     app.get("/camps/:id", async (req, res) => {
