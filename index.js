@@ -42,7 +42,7 @@ async function run() {
 
     // verify token
     const verifyToken = (req, res, next) => {
-      console.log('inside verify token', req.headers.authorization)
+      // console.log('inside verify token', req.headers.authorization)
       if (!req.headers.authorization) {
         return res.status(401).send({ message: 'unauthorized access' })
       }
@@ -142,6 +142,21 @@ async function run() {
       const result = await campsCollection.deleteOne(query)
       res.send(result)
     })
+
+    app.patch("/camps/:id", async (req, res) => {
+      const id = req.params.id;
+      const item = req.body;
+      console.log(item)
+      const query = { _id: new ObjectId(id) }
+      // const options = { upsert: true };
+      const updatedDoc = {
+          $set: {
+              ...item
+          }
+      }
+      const result = await campsCollection.updateOne(query, updatedDoc)
+      res.send(result)
+  })
 
 
 
