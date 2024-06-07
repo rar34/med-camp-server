@@ -32,6 +32,7 @@ async function run() {
 
     const campsCollection = client.db('medicalCamp').collection('availableCamps');
     const userCollection = client.db('medicalCamp').collection('users');
+    const regCampCollection = client.db('medicalCamp').collection('regCamp');
 
     // token
     app.post('/jwt', async (req, res) => {
@@ -74,7 +75,7 @@ async function run() {
 
 
     // user related api
-    app.get("/users/:email", verifyToken, async (req, res) => {
+    app.get("/users/:email", async (req, res) => {
       // console.log(req.headers)
       const email = req.params.email;
       const query = { email: email }
@@ -169,6 +170,29 @@ async function run() {
       }
       const result = await campsCollection.updateOne(query, updatedDoc)
       res.send(result)
+    })
+
+
+    // save registered camp to the database
+    app.post('/joinCamp', async (req, res) => {
+      const joinCamp = req.body;
+      console.log(joinCamp)
+      const query = {
+        participantEmail: joinCamp.participantEmail,
+        campId: joinCamp.campId
+      }
+      const alreadyJoin = await regCampCollection.findOne(query)
+      if (alreadyJoin) {
+        return res.status(400).send('You have already join for this camp')
+      }
+      const result = await regCampCollection.insertOne(joinCamp)
+
+      const updatedDoc = {
+        $inc: { participantCount: 1 }
+      }
+      const joinQuery = { _id: new ObjectId(joinCamp.campId) }
+      const updatedCamp = await campsCollection.updateOne(joinQuery, updatedDoc)
+      res.send(updatedCamp)
     })
 
 
