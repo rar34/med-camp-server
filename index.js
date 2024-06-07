@@ -110,6 +110,19 @@ async function run() {
       res.send(result)
     })
 
+    app.patch("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const updateUser = req.body;
+      const query = { _id: new ObjectId(id) }
+      const updatedDoc = {
+        $set: {
+          ...updateUser
+        }
+      }
+      const result = await userCollection.updateOne(query, updatedDoc)
+      res.send(result)
+    })
+
 
 
     // camps related apis 
@@ -146,17 +159,17 @@ async function run() {
     app.patch("/camps/:id", async (req, res) => {
       const id = req.params.id;
       const item = req.body;
-      console.log(item)
+      // console.log(item)
       const query = { _id: new ObjectId(id) }
       // const options = { upsert: true };
       const updatedDoc = {
-          $set: {
-              ...item
-          }
+        $set: {
+          ...item
+        }
       }
       const result = await campsCollection.updateOne(query, updatedDoc)
       res.send(result)
-  })
+    })
 
 
 
