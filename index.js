@@ -3,6 +3,7 @@ const cors = require('cors');
 const app = express();
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
@@ -192,8 +193,36 @@ async function run() {
       }
       const joinQuery = { _id: new ObjectId(joinCamp.campId) }
       const updatedCamp = await campsCollection.updateOne(joinQuery, updatedDoc)
-      res.send(updatedCamp)
+      console.log(updatedCamp)
+      res.send(result)
     })
+
+
+    app.get('/regCamps/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = {
+        participantEmail: email
+      }
+      const result = await regCampCollection.find(query).toArray();
+      res.send(result)
+    })
+
+
+    // payment intent
+    app.post("/create-payment-intent", async (req, res) => {
+      const { fees } = req.body;
+      const amount = parseInt(fees * 100);
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount : amount,
+        currency: 'usd',
+        payment_method_types: ['card']
+      })
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      })
+    })
+
 
 
 
