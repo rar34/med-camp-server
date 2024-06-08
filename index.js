@@ -235,9 +235,19 @@ async function run() {
 
     app.post('/payments', async (req, res) => {
       const payment = req.body;
-      // console.log(payment)
+      console.log(payment)
 
       const result = await paymentCollection.insertOne(payment)
+      res.send(result)
+    })
+
+    app.get('/payments/:email',verifyToken, async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email }
+      if (email !== req.decoded.email) {
+        return res.status(403).send({ message: 'forbidden access' })
+      }
+      const result = await paymentCollection.find(query).toArray()
       res.send(result)
     })
 
