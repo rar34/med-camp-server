@@ -9,7 +9,11 @@ const port = process.env.PORT || 5000;
 
 
 // middleware
-app.use(cors())
+app.use(cors({
+  origin: [
+    "http://localhost:5173"
+  ]
+}))
 app.use(express.json())
 
 
@@ -34,6 +38,7 @@ async function run() {
     const campsCollection = client.db('medicalCamp').collection('availableCamps');
     const userCollection = client.db('medicalCamp').collection('users');
     const regCampCollection = client.db('medicalCamp').collection('regCamp');
+    const paymentCollection = client.db('medicalCamp').collection('payments');
 
     // token
     app.post('/jwt', async (req, res) => {
@@ -129,12 +134,8 @@ async function run() {
 
     // camps related apis 
     app.get("/camps", async (req, res) => {
-      // const query = {};
-      // const options = {
-      //   sort: { participantCount: -1 } 
-      // };
+
       const result = await campsCollection.find().toArray()
-      // const result = await campsCollection.find(query, options).toArray()
       res.send(result);
     })
 
@@ -207,20 +208,37 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/regCamp/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await regCampCollection.findOne(query)
+      res.send(result)
+    })
+
 
     // payment intent
     app.post("/create-payment-intent", async (req, res) => {
       const { fees } = req.body;
       const amount = parseInt(fees * 100);
+      console.log(amount)
 
       const paymentIntent = await stripe.paymentIntents.create({
-        amount : amount,
+        amount: amount,
         currency: 'usd',
         payment_method_types: ['card']
       })
       res.send({
         clientSecret: paymentIntent.client_secret
       })
+    })
+
+
+    app.post('/payments', async (req, res) => {
+      const payment = req.body;
+      // console.log(payment)
+
+      const result = await paymentCollection.insertOne(payment)
+      res.send(result)
     })
 
 
