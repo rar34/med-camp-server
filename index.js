@@ -39,6 +39,7 @@ async function run() {
     const userCollection = client.db('medicalCamp').collection('users');
     const regCampCollection = client.db('medicalCamp').collection('regCamp');
     const paymentCollection = client.db('medicalCamp').collection('payments');
+    const reviewCollection = client.db('medicalCamp').collection('reviews');
 
     // token
     app.post('/jwt', async (req, res) => {
@@ -233,7 +234,7 @@ async function run() {
       const result = await regCampCollection.updateOne(query, updatedDoc)
       res.send(result)
     })
-    
+
     app.patch('/regCamp/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
@@ -289,6 +290,14 @@ async function run() {
         return res.status(403).send({ message: 'forbidden access' })
       }
       const result = await paymentCollection.find(query).toArray()
+      res.send(result)
+    })
+
+
+    // review related apis
+    app.post('/reviews', async(req, res)=>{
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review)
       res.send(result)
     })
 
