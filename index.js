@@ -197,15 +197,15 @@ async function run() {
       console.log(updatedCamp)
       res.send(result)
     })
+    
 
+    // Registered camps related apis
     app.get('/regCamps', async (req, res) => {
       const result = await regCampCollection.find().toArray();
       res.send(result)
     })
 
 
-
-    // Registered camps related apis
     app.get('/regCamps/:email', async (req, res) => {
       const email = req.params.email;
       const query = {
@@ -228,6 +228,18 @@ async function run() {
       const updatedDoc = {
         $set: {
           paymentStatus: 'Paid'
+        }
+      }
+      const result = await regCampCollection.updateOne(query, updatedDoc)
+      res.send(result)
+    })
+    
+    app.patch('/regCamp/:id', verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const updatedDoc = {
+        $set: {
+          confirmStatus: 'Confirmed'
         }
       }
       const result = await regCampCollection.updateOne(query, updatedDoc)
