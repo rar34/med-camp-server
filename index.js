@@ -178,7 +178,7 @@ async function run() {
     // save registered camp to the database
     app.post('/joinCamp', async (req, res) => {
       const joinCamp = req.body;
-      console.log(joinCamp)
+      // console.log(joinCamp)
       const query = {
         participantEmail: joinCamp.participantEmail,
         campId: joinCamp.campId
@@ -195,6 +195,11 @@ async function run() {
       const joinQuery = { _id: new ObjectId(joinCamp.campId) }
       const updatedCamp = await campsCollection.updateOne(joinQuery, updatedDoc)
       console.log(updatedCamp)
+      res.send(result)
+    })
+
+    app.get('/regCamps', async (req, res) => {
+      const result = await regCampCollection.find().toArray();
       res.send(result)
     })
 
@@ -236,12 +241,23 @@ async function run() {
     app.post('/payments', async (req, res) => {
       const payment = req.body;
       console.log(payment)
-
       const result = await paymentCollection.insertOne(payment)
       res.send(result)
     })
 
-    app.get('/payments/:email',verifyToken, async (req, res) => {
+    app.patch('/regCamps/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const updatedDoc = {
+        $set: {
+          paymentStatus: 'Paid'
+        }
+      }
+      const result = await regCampCollection.updateOne(query, updatedDoc)
+      res.send(result)
+    })
+
+    app.get('/payments/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { email: email }
       if (email !== req.decoded.email) {
