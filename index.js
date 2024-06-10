@@ -204,6 +204,8 @@ async function run() {
     })
 
 
+
+    // Registered camps related apis
     app.get('/regCamps/:email', async (req, res) => {
       const email = req.params.email;
       const query = {
@@ -219,6 +221,27 @@ async function run() {
       const result = await regCampCollection.findOne(query)
       res.send(result)
     })
+
+    app.patch('/regCamps/:id', verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const updatedDoc = {
+        $set: {
+          paymentStatus: 'Paid'
+        }
+      }
+      const result = await regCampCollection.updateOne(query, updatedDoc)
+      res.send(result)
+    })
+
+    app.delete("/regCamps/:id", verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await regCampCollection.deleteOne(query)
+      res.send(result)
+    })
+
+
 
 
     // payment intent
@@ -245,17 +268,7 @@ async function run() {
       res.send(result)
     })
 
-    app.patch('/regCamps/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) }
-      const updatedDoc = {
-        $set: {
-          paymentStatus: 'Paid'
-        }
-      }
-      const result = await regCampCollection.updateOne(query, updatedDoc)
-      res.send(result)
-    })
+    
 
     app.get('/payments/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
