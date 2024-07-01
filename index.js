@@ -310,7 +310,13 @@ async function run() {
     })
 
     // Blood donor related apis
-    app.post('/donate', async (req, res)=>{
+
+    app.get('/donate', async (req, res) => {
+      const result = await bloodDonorCollection.find().toArray();
+      res.send(result)
+    })
+
+    app.post('/donate', async (req, res) => {
       const donor = req.body;
       const result = await bloodDonorCollection.insertOne(donor);
       res.send(result)
