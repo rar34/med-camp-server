@@ -11,7 +11,9 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(cors({
   origin: [
-    "http://localhost:5173"
+    "http://localhost:5173",
+    "https://med-camp-server.vercel.app",
+    "https://medcamporganizer.web.app"
   ]
 }))
 app.use(express.json())
@@ -33,13 +35,14 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const campsCollection = client.db('medicalCamp').collection('availableCamps');
     const userCollection = client.db('medicalCamp').collection('users');
     const regCampCollection = client.db('medicalCamp').collection('regCamp');
     const paymentCollection = client.db('medicalCamp').collection('payments');
     const reviewCollection = client.db('medicalCamp').collection('reviews');
+    const bloodDonorCollection = client.db('medicalCamp').collection('bloodDonor');
 
     // token
     app.post('/jwt', async (req, res) => {
@@ -198,7 +201,7 @@ async function run() {
       console.log(updatedCamp)
       res.send(result)
     })
-    
+
 
     // Registered camps related apis
     app.get('/regCamps', async (req, res) => {
@@ -281,7 +284,7 @@ async function run() {
       res.send(result)
     })
 
-    
+
 
     app.get('/payments/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
@@ -295,18 +298,29 @@ async function run() {
 
 
     // review related apis
-    app.post('/reviews', async(req, res)=>{
+    app.post('/reviews', async (req, res) => {
       const review = req.body;
       const result = await reviewCollection.insertOne(review)
       res.send(result)
     })
 
+    app.get('/reviews', async (req, res) => {
+      const result = await reviewCollection.find().toArray();
+      res.send(result);
+    })
+
+    // Blood donor related apis
+    app.post('/donate', async (req, res)=>{
+      const donor = req.body;
+      const result = await bloodDonorCollection.insertOne(donor);
+      res.send(result)
+    })
 
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
